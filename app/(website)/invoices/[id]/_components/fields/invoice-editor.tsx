@@ -25,7 +25,7 @@ export default function InvoiceEditor({
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
-      <Toolbar invoiceId={data.id} mode={mode} />
+<Toolbar invoiceId={data.id} mode={mode} pdfData={data} />
 
       <div
         style={{

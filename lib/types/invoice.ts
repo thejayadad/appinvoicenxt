@@ -1,4 +1,6 @@
-// /types/invoice.ts
+// /lib/types/invoice.ts
+export type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
+
 export type Party = {
   name: string;
   email?: string;
@@ -21,7 +23,7 @@ export type InvoiceData = {
   billTo: Party;
   number: string;
   date: string;
-  status: string;
+  status: InvoiceStatus; // 👈 this ensures consistency
   items: InvoiceItem[];
   taxPercent: number;
   currency: string;
