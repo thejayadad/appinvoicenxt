@@ -435,4 +435,211 @@ It separates design from logic using style constants and helper functions.
 
 
 ### SINGLE INVOICE PAGE ###
-- 
+- update the page to async 
+- add search params to get the invoice information from teh url params and eventually the database
+
+```
+{
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { mode?: "preview" | "edit" };
+}
+
+```
+
+- start with this inital data to eventuall put something on screen
+
+```
+import ToolBar from "./_components/toolbar";
+
+
+
+async function getInvoice(id: string) {
+  return {
+    id,
+    title: "Invoice",
+    from: { name: "IndyDevLab", email: "hello@indylab.dev", address: "6202 Old W Blvd, Phoenix, AZ", phone: "702-555-0179" },
+    billTo: { name: "Client Name", email: "", address: "", phone: "" },
+    number: "INV0001",
+    date: new Date().toISOString().slice(0, 10),
+    status: "Draft",
+    items: [
+      { id: "i1", description: "Design work", rate: 120, qty: 10 },
+      { id: "i2", description: "Development", rate: 140, qty: 20 },
+    ],
+    notes: "",
+    taxPercent: 0,
+    currency: "USD",
+    brand: { name: "Invoice Simple Clone" },
+  };
+}
+
+export default async function InvoicePage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { mode?: "preview" | "edit" };
+}){
+    const initialData = await getInvoice(params.id);
+const mode = searchParams.mode === "preview" ? "preview" : "edit";
+    return (
+        <div>
+            <ToolBar
+                invoiceId="demo"
+                mode="edit"
+            />
+            <div>
+                InvoicePage
+            </div>
+        </div>
+    )
+}
+
+```
+
+- then add component invoice editor
+- update the single page so it only shows the editor
+
+```
+ 
+'use client'
+
+export default function InvoiceEditor(){
+    return (
+    <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+            InvoiceEditor
+        </div>
+    )
+}
+
+```
+
+
+--- single page.tsx ---
+
+```
+import InvoiceEditor from "./_components/invoice-editor";
+import ToolBar from "./_components/toolbar";
+
+
+
+async function getInvoice(id: string) {
+  return {
+    id,
+    title: "Invoice",
+    from: { name: "IndyDevLab", email: "hello@indylab.dev", address: "6202 Old W Blvd, Phoenix, AZ", phone: "702-555-0179" },
+    billTo: { name: "Client Name", email: "", address: "", phone: "" },
+    number: "INV0001",
+    date: new Date().toISOString().slice(0, 10),
+    status: "Draft",
+    items: [
+      { id: "i1", description: "Design work", rate: 120, qty: 10 },
+      { id: "i2", description: "Development", rate: 140, qty: 20 },
+    ],
+    notes: "",
+    taxPercent: 0,
+    currency: "USD",
+    brand: { name: "Invoice Simple Clone" },
+  };
+}
+
+export default async function InvoicePage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { mode?: "preview" | "edit" };
+}){
+    const initialData = await getInvoice(params.id);
+const mode = searchParams.mode === "preview" ? "preview" : "edit";
+    return <InvoiceEditor />
+}
+
+
+```
+- add the props with mode and initial data 
+- wll get error on id bring in data state to fix it:
+
+```
+  const [data, setData] = useState<InvoiceData>(initialData);
+
+
+```
+
+- begin to style teh invoice layout
+- adding edit mode review:
+
+```
+
+'use client'
+
+import { InvoiceData } from "@/lib/types/invoice"
+import Toolbar from "./toolbar"
+import { useState } from "react";
+
+export default function InvoiceEditor({initialData, mode}: {initialData: InvoiceData; mode: "preview" | "edit"}){
+      const [data, setData] = useState<InvoiceData>(initialData);
+
+    return (
+    <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+            <Toolbar
+                invoiceId={data.id}
+                mode={mode}
+            />
+            <div
+                style={{
+                margin: "24px auto",
+                maxWidth: 1100,
+                display: "grid",
+                gridTemplateColumns: "1fr 320px",
+                gap: 16,
+                }}
+
+            >
+                <main
+                     style={{
+                        backgroundColor: "#fff",
+                        padding: 24,
+                        borderRadius: 8,
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                        color: "#111",
+                    }}
+                >
+
+                        {/* === TITLE & LOGO === */}
+                        <div
+                            style={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr 160px",
+                            gap: 12,
+                            marginBottom: 12,
+                            }}
+                        >
+                        <div>
+                            {mode === "edit" ? (
+                                <input
+                                placeholder="Invoice"
+                                style={{
+                                    width: "100%",
+                                    padding: 8,
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: 6,
+                                }}
+                                />
+                            ) : (
+
+                                <h1>{data.title}</h1>
+                            )}
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    )
+}
+
+```
+
