@@ -1,16 +1,35 @@
-import ToolBar from "./_components/toolbar";
+import InvoiceEditor from "./_components/fields/invoice-editor";
 
 
-export default  function InvoicePage(){
-    return (
-        <div>
-            <ToolBar
-                invoiceId="demo"
-                mode="edit"
-            />
-            <div>
-                InvoicePage
-            </div>
-        </div>
-    )
+
+async function getInvoice(id: string) {
+  return {
+    id,
+    title: "Invoice",
+    from: { name: "IndyDevLab", email: "hello@indylab.dev", address: "6202 Old W Blvd, Phoenix, AZ", phone: "702-555-0179" },
+    billTo: { name: "Client Name", email: "", address: "", phone: "" },
+    number: "INV0001",
+    date: new Date().toISOString().slice(0, 10),
+    status: "Draft",
+    items: [
+      { id: "i1", description: "Design work", rate: 120, qty: 10 },
+      { id: "i2", description: "Development", rate: 140, qty: 20 },
+    ],
+    notes: "",
+    taxPercent: 0,
+    currency: "USD",
+    brand: { name: "Invoice Simple Clone" },
+  };
+}
+
+export default async function InvoicePage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { mode?: "preview" | "edit" };
+}){
+    const initialData = await getInvoice(params.id);
+const mode = await searchParams.mode === "preview" ? "preview" : "edit";
+    return <InvoiceEditor initialData={initialData} mode={mode} />
 }

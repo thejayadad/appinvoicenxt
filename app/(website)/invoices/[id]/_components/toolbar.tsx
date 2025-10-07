@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Eye, Pencil } from "lucide-react";
 
 import dynamic from "next/dynamic";
-import { InvoiceData } from "@/lib/types/invoice";
 
 // Lazy-load PDF button (client-only)
 // const PdfDownloadButton = dynamic(
@@ -17,7 +16,6 @@ type Mode = "preview" | "edit";
 interface ToolbarProps {
   invoiceId: string;
   mode: Mode;
-  pdfData?: InvoiceData;
 }
 
 // ✅ Reusable inline style helpers
@@ -45,7 +43,7 @@ const headerStyle: React.CSSProperties = {
   zIndex: 10,
 };
 
-export default function Toolbar({ invoiceId, mode, pdfData }: ToolbarProps) {
+export default function Toolbar({ invoiceId, mode,  }: ToolbarProps) {
   const base = `/invoices/${invoiceId}`;
   const isPreview = mode === "preview";
 
@@ -73,13 +71,13 @@ export default function Toolbar({ invoiceId, mode, pdfData }: ToolbarProps) {
 
   return (
     <header style={headerStyle}>
-      <div style={{ display: "flex", gap: 8 }}>
+      <div style={{ display: "flex", gap: 8, width: "85%", margin: "auto" }}>
         {renderNavButton(
           `${base}?mode=preview`,
           "Preview",
           isPreview,
           Eye,
-          "#2563eb", // blue for preview
+          "#9ca3af", // neutral gray for edit (was blue)
           "#f3f4f6"
         )}
 
