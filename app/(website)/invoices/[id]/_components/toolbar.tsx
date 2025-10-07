@@ -77,7 +77,7 @@ export default function Toolbar({ invoiceId, mode,  }: ToolbarProps) {
           "Preview",
           isPreview,
           Eye,
-          "#2563eb", // blue for preview
+          "#9ca3af", // neutral gray for edit (was blue)
           "#f3f4f6"
         )}
 

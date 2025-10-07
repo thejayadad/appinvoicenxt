@@ -11,7 +11,7 @@ export default function InvoiceTitleField({
 }) {
   return (
     <div>
-      <label style={{ fontSize: 12, color: "#6b7280" }}>Invoice Title</label>
+      <label style={{ fontSize: 12, color: "#6b7280" }}>Invoice <span className="hidden md:inline-block">Title</span></label>
       {mode === "edit" ? (
         <input
           value={data.title}

@@ -643,3 +643,439 @@ export default function InvoiceEditor({initialData, mode}: {initialData: Invoice
 
 ```
 
+-- making it modular ---
+## INVOICE EDITOR ##
+
+```
+"use client";
+
+import { useState } from "react";
+import { InvoiceData } from "@/lib/types/invoice";
+import Toolbar from "../toolbar";
+import { InvoiceHeaderFields } from "./InvoiceHeaderFields";
+
+
+export default function InvoiceEditor({
+  initialData,
+  mode,
+}: {
+  initialData: InvoiceData;
+  mode: "preview" | "edit";
+}) {
+  const [data, setData] = useState<InvoiceData>(initialData);
+
+  // ✅ Generic, type-safe updater function
+  const update = <K extends keyof InvoiceData>(key: K, val: InvoiceData[K]) =>
+    setData((prev) => ({ ...prev, [key]: val }));
+
+  return (
+    <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+      <Toolbar invoiceId={data.id} mode={mode} />
+
+      <div
+        style={{
+          margin: "24px auto",
+          maxWidth: 1100,
+          display: "grid",
+          gridTemplateColumns: "1fr 320px",
+          gap: 16,
+        }}
+      >
+        <main
+          style={{
+            backgroundColor: "#fff",
+            padding: 24,
+            borderRadius: 8,
+            boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+            color: "#111",
+          }}
+        >
+          <InvoiceHeaderFields data={data} mode={mode} update={update} />
+        </main>
+      </div>
+    </div>
+  );
+}
+
+
+```
+
+- create the componet
+- style it and bring in as a prop
+- then create the header and respective fields
+- make sure it can update and does so on the preview and edit
+
+
+### {/* === FROM / BILL TO === */} ####
+- create the partyfieldsgroup.tsx file
+- this will hold the other cards and fields
+- create teh compoent then import it in the editor
+- partyfieldsgroup.tsx
+
+```
+
+import { InvoiceData } from "@/lib/types/invoice";
+
+
+export default function PartyFieldsGroup (
+    {
+ data,
+  mode,
+    update,
+
+}: {
+  data: InvoiceData;
+  mode: "preview" | "edit";
+update: <K extends keyof InvoiceData>(key: K, val: InvoiceData[K]) => void;
+
+}
+) {
+    return (
+        <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+              marginBottom: 12,
+            }}
+        >
+            PartyFields Group
+        </div>
+    )
+}
+```
+
+--- Editor.tsx ---
+
+```
+
+"use client";
+
+import { useState } from "react";
+import { InvoiceData } from "@/lib/types/invoice";
+import Toolbar from "../toolbar";
+import { InvoiceHeaderFields } from "./InvoiceHeaderFields";
+import PartyFieldsGroup from "./partyFieldsGroup";
+
+
+export default function InvoiceEditor({
+  initialData,
+  mode,
+}: {
+  initialData: InvoiceData;
+  mode: "preview" | "edit";
+}) {
+  const [data, setData] = useState<InvoiceData>(initialData);
+
+  // ✅ Generic, type-safe updater function
+  const update = <K extends keyof InvoiceData>(key: K, val: InvoiceData[K]) =>
+    setData((prev) => ({ ...prev, [key]: val }));
+
+  return (
+    <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
+      <Toolbar invoiceId={data.id} mode={mode} />
+
+      <div
+        style={{
+          margin: "24px auto",
+          maxWidth: 1100,
+          display: "grid",
+          gridTemplateColumns: "1fr 320px",
+          gap: 16,
+        }}
+      >
+        <main
+          style={{
+            backgroundColor: "#fff",
+            padding: 24,
+            borderRadius: 8,
+            boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+            color: "#111",
+          }}
+        >
+          <InvoiceHeaderFields data={data} mode={mode} update={update} />
+          <PartyFieldsGroup mode={mode} data={data} update={update} />
+        </main>
+      </div>
+    </div>
+  );
+}
+
+```
+
+--- partyCardField.tsx ---
+- create the component
+- add the code make sure to add the props:
+
+```
+import { InvoiceData, Party } from "@/lib/types/invoice";
+
+type Props = {
+  label: string;
+  side: "from" | "billTo";
+  data: InvoiceData;
+  mode: "preview" | "edit";
+  update: <K extends keyof InvoiceData>(key: K, val: InvoiceData[K]) => void;
+};
+
+export default function PartyCardField({
+  label,
+  side,
+  data,
+  mode,
+  update,
+}: Props) {
+  const party = data[side];
+  const fields = ["name", "email", "address", "phone"] as const;
+
+  // Merge partial edits back into the correct side (from/billTo)
+  const patch = (patchData: Partial<Party>) =>
+    update(side, { ...party, ...patchData } as InvoiceData[typeof side]);
+
+  return (
+    <div
+      style={{
+        border: "1px solid #e5e7eb",
+        borderRadius: 8,
+        padding: 12,
+        backgroundColor: "#fff",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 12,
+          color: "#6b7280",
+          marginBottom: 6,
+          fontWeight: 600,
+        }}
+      >
+        {label}
+      </div>
+
+      {mode === "edit" ? (
+        <>
+          {fields.map((fieldKey) => (
+            <input
+              key={fieldKey}
+              value={(party[fieldKey] as string) ?? ""}
+              onChange={(e) => patch({ [fieldKey]: e.target.value } as Partial<Party>)}
+              placeholder={fieldKey[0].toUpperCase() + fieldKey.slice(1)}
+              style={{
+                width: "100%",
+                padding: 8,
+                border: "1px solid #e5e7eb",
+                borderRadius: 6,
+                marginBottom: 6,
+              }}
+            />
+          ))}
+        </>
+      ) : (
+        <>
+          <div style={{ fontWeight: 600 }}>{party.name || "—"}</div>
+          {!!party.email && <div>{party.email}</div>}
+          {!!party.address && <div>{party.address}</div>}
+          {!!party.phone && <div>{party.phone}</div>}
+        </>
+      )}
+    </div>
+  );
+}
+
+
+```
+
+--- add the group which is easy now ---
+- use the reusable component
+
+```
+
+import { InvoiceData } from "@/lib/types/invoice";
+import PartyCardField from "./partyCardField";
+
+
+export default function PartyFieldsGroup (
+    {
+ data,
+  mode,
+    update,
+
+}: {
+  data: InvoiceData;
+  mode: "preview" | "edit";
+update: <K extends keyof InvoiceData>(key: K, val: InvoiceData[K]) => void;
+
+}
+) {
+    return (
+        <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+              marginBottom: 12,
+            }}
+        >
+            <PartyCardField
+                label="From"
+                side="from"
+                data={data}
+                mode={mode}
+                update={update}
+            />
+                <PartyCardField
+                    label="Bill To"
+                    side="billTo"
+                    data={data}
+                    mode={mode}
+                    update={update}
+                />
+        </div>
+    )
+}
+```
+--- LineItemsGroup.tsx --- 
+- create the component
+- starting point
+
+```
+
+import { InvoiceData } from "@/lib/types/invoice";
+
+
+type Props = {
+  data: InvoiceData;
+  mode: "preview" | "edit";
+  update: <K extends keyof InvoiceData>(key: K, val: InvoiceData[K]) => void;
+};
+
+
+
+export default function LineItemsGroup({ data, mode, update }: Props) {
+    return (
+        <div>
+      <div style={{ fontWeight: 700, marginBottom: 6 }}>Line Items</div>
+       <table style={{ width: "100%", borderCollapse: "collapse" }}>
+         <thead>
+          <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+            <th style={{ textAlign: "left", paddingBottom: 6 }}>Description</th>
+            <th style={{ textAlign: "right", paddingBottom: 6, width: 120 }}>Rate</th>
+            <th style={{ textAlign: "right", paddingBottom: 6, width: 80 }}>Qty</th>
+            <th style={{ textAlign: "right", paddingBottom: 6, width: 130 }}>Amount</th>
+            <th style={{ width: 40 }} />
+          </tr>
+        </thead>
+          
+
+
+        </table>
+        </div>
+    )
+}
+
+```
+--- add lineitemrow ---
+- bring it into the componet with props
+- style it
+```import * as React from "react";
+import { InvoiceItem } from "@/lib/types/invoice";
+
+function currency(n: number, ccy = "USD") {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: ccy }).format(n || 0);
+}
+
+type Props = {
+  item: InvoiceItem;
+  mode: "preview" | "edit";
+  currencyCode: string;
+  onChange: (patch: Partial<InvoiceItem>) => void;
+  onRemove?: () => void;
+};
+
+export default function LineItemRow({
+  item,
+  mode,
+  currencyCode,
+  onChange,
+  onRemove,
+}: Props) {
+  const amount = (Number(item.rate) || 0) * (Number(item.qty) || 0);
+
+  if (mode === "preview") {
+    return (
+      <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
+        <td style={{ padding: "6px 0" }}>{item.description || "—"}</td>
+        <td style={{ padding: "6px 0", textAlign: "right" }}>{currency(item.rate, currencyCode)}</td>
+        <td style={{ padding: "6px 0", textAlign: "right" }}>{item.qty}</td>
+        <td style={{ padding: "6px 0", textAlign: "right" }}>{currency(amount, currencyCode)}</td>
+        <td />
+      </tr>
+    );
+  }
+
+  // edit mode
+  return (
+    <tr style={{ borderBottom: "1px solid #f3f4f6" }}>
+      <td style={{ padding: "6px 0" }}>
+        <input
+          value={item.description}
+          onChange={(e) => onChange({ description: e.target.value })}
+          placeholder="Description"
+          style={{ width: "100%", padding: 8, border: "1px solid #e5e7eb", borderRadius: 6 }}
+        />
+      </td>
+      <td style={{ padding: "6px 0", textAlign: "right" }}>
+        <input
+          type="number"
+          value={item.rate}
+          onChange={(e) => onChange({ rate: Number(e.target.value) || 0 })}
+          style={{
+            width: "100%",
+            padding: 8,
+            border: "1px solid #e5e7eb",
+            borderRadius: 6,
+            textAlign: "right",
+          }}
+        />
+      </td>
+      <td style={{ padding: "6px 0", textAlign: "right" }}>
+        <input
+          type="number"
+          value={item.qty}
+          onChange={(e) => onChange({ qty: Number(e.target.value) || 0 })}
+          style={{
+            width: "100%",
+            padding: 8,
+            border: "1px solid #e5e7eb",
+            borderRadius: 6,
+            textAlign: "right",
+          }}
+        />
+      </td>
+      <td style={{ padding: "6px 0", textAlign: "right" }}>{currency(amount, currencyCode)}</td>
+      <td style={{ textAlign: "right" }}>
+        {onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            style={{
+              padding: "1px 3px",
+              borderRadius: 6,
+              border: "1px solid #fca5a5",
+              background: "#fee2e2",
+              color: "#b91c1c",
+              cursor: "pointer",
+            }}
+          >
+            ✕
+          </button>
+        )}
+      </td>
+    </tr>
+  );
+}
+
+
+
+```
+

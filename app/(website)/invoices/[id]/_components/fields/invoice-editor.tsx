@@ -4,6 +4,8 @@ import { useState } from "react";
 import { InvoiceData } from "@/lib/types/invoice";
 import Toolbar from "../toolbar";
 import { InvoiceHeaderFields } from "./InvoiceHeaderFields";
+import PartyFieldsGroup from "./partyFieldsGroup";
+import LineItemGroup from "./lineItemsGroup";
 
 
 export default function InvoiceEditor({
@@ -42,6 +44,9 @@ export default function InvoiceEditor({
           }}
         >
           <InvoiceHeaderFields data={data} mode={mode} update={update} />
+          <PartyFieldsGroup mode={mode} data={data} update={update} />
+          <LineItemGroup mode={mode} data={data} update={update}
+          />
         </main>
       </div>
     </div>
