@@ -6,6 +6,8 @@ import Toolbar from "../toolbar";
 import { InvoiceHeaderFields } from "./InvoiceHeaderFields";
 import PartyFieldsGroup from "./partyFieldsGroup";
 import LineItemGroup from "./lineItemsGroup";
+import TotalsCard from "./totalCard";
+import NotesSection from "./notesSection";
 
 
 export default function InvoiceEditor({
@@ -23,7 +25,7 @@ export default function InvoiceEditor({
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9fafb" }}>
-      <Toolbar invoiceId={data.id} mode={mode} />
+<Toolbar invoiceId={data.id} mode={mode} pdfData={data} />
 
       <div
         style={{
@@ -46,7 +48,11 @@ export default function InvoiceEditor({
           <InvoiceHeaderFields data={data} mode={mode} update={update} />
           <PartyFieldsGroup mode={mode} data={data} update={update} />
           <LineItemGroup mode={mode} data={data} update={update}
+          
           />
+          <TotalsCard data={data} mode={mode} update={update} />
+          <NotesSection data={data} mode={mode} update={update} />
+
         </main>
       </div>
     </div>

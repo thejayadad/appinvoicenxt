@@ -1,26 +1,24 @@
+import { InvoiceData } from "@/lib/types/invoice";
 import InvoiceEditor from "./_components/fields/invoice-editor";
 
 
-
-async function getInvoice(id: string) {
+async function getInvoice(id: string): Promise<InvoiceData> {
   return {
     id,
     title: "Invoice",
-    from: { name: "IndyDevLab", email: "hello@indylab.dev", address: "6202 Old W Blvd, Phoenix, AZ", phone: "702-555-0179" },
-    billTo: { name: "Client Name", email: "", address: "", phone: "" },
+    from: { name: "IndyDevLab", email: "hello@indylab.dev" },
+    billTo: { name: "Client Name" },
     number: "INV0001",
     date: new Date().toISOString().slice(0, 10),
-    status: "Draft",
-    items: [
-      { id: "i1", description: "Design work", rate: 120, qty: 10 },
-      { id: "i2", description: "Development", rate: 140, qty: 20 },
-    ],
-    notes: "",
+    status: "Draft", // ✅ valid union value
+    items: [],
     taxPercent: 0,
     currency: "USD",
+    notes: "",
     brand: { name: "Invoice Simple Clone" },
   };
 }
+
 
 export default async function InvoicePage({
   params,

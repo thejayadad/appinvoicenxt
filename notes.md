@@ -1079,3 +1079,171 @@ export default function LineItemRow({
 
 ```
 
+--- Total  Card ---
+- create the component
+
+```
+import { InvoiceData } from "@/lib/types/invoice";
+
+function formatCurrency(amount: number, currency = "USD") {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+  }).format(amount || 0);
+}
+
+export default function TotalsCard({
+  data,
+  mode,
+  update,
+}: {
+  data: InvoiceData;
+  mode: "preview" | "edit";
+  update: <K extends keyof InvoiceData>(key: K, val: InvoiceData[K]) => void;
+}) {
+  const ccy = data.currency || "USD";
+  const subtotal = data.items.reduce(
+    (sum, item) => sum + (item.rate || 0) * (item.qty || 0),
+    0
+  );
+  const tax = subtotal * ((data.taxPercent || 0) / 100);
+  const total = subtotal + tax;
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 320px",
+        gap: 12,
+        marginTop: 16,
+      }}
+    >
+      <div />
+      <div
+        style={{
+          border: "1px solid #e5e7eb",
+          borderRadius: 8,
+          padding: 12,
+          backgroundColor: "#fff",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            rowGap: 6,
+            fontSize: 14,
+          }}
+        >
+          <div>Subtotal</div>
+          <div style={{ textAlign: "right" }}>
+            {formatCurrency(subtotal, ccy)}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center" }}>
+            Tax&nbsp;
+            {mode === "edit" ? (
+              <input
+                type="number"
+                value={data.taxPercent ?? 0}
+                onChange={(e) =>
+                  update("taxPercent", Number(e.target.value) || 0)
+                }
+                style={{
+                  width: 60,
+                  padding: "2px 4px",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 4,
+                  textAlign: "right",
+                  marginRight: 4,
+                }}
+              />
+            ) : (
+              <>({data.taxPercent || 0}%)</>
+            )}
+          </div>
+          <div style={{ textAlign: "right" }}>
+            {formatCurrency(tax, ccy)}
+          </div>
+
+          <div style={{ fontWeight: 700 }}>Total</div>
+          <div style={{ textAlign: "right", fontWeight: 700 }}>
+            {formatCurrency(total, ccy)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+```
+
+--- Notes Card ---
+- create component
+- add code
+
+```
+import { InvoiceData } from "@/lib/types/invoice";
+
+export default function NotesSection({
+  data,
+  mode,
+  update,
+}: {
+  data: InvoiceData;
+  mode: "preview" | "edit";
+  update: <K extends keyof InvoiceData>(key: K, val: InvoiceData[K]) => void;
+}) {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <label
+        style={{
+          fontSize: 12,
+          color: "#6b7280",
+          display: "block",
+          marginBottom: 4, 
+        }}
+      >
+        Notes
+      </label>
+
+      {mode === "edit" ? (
+        <textarea
+          value={data.notes || ""}
+          onChange={(e) => update("notes", e.target.value)}
+          rows={4}
+          placeholder="Notes to customer"
+          style={{
+            width: "100%",
+            padding: 10,
+            border: "1px solid #e5e7eb",
+            borderRadius: 8,
+            resize: "vertical",
+            fontSize: 14,
+            color: "#111",
+          }}
+        />
+      ) : (
+        <p
+          style={{
+            whiteSpace: "pre-wrap",
+            marginTop: 6,
+            fontSize: 14,
+            color: data.notes ? "#111" : "#9ca3af",
+          }}
+        >
+          {data.notes || "—"}
+        </p>
+      )}
+    </div>
+  );
+}
+
+
+```
+
+--- PdgDownloadBtn ---
+- create the component
+- bring in the toolbar
+- 

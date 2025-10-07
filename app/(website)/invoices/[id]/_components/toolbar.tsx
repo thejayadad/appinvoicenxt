@@ -2,23 +2,23 @@
 
 import Link from "next/link";
 import { Eye, Pencil } from "lucide-react";
-
 import dynamic from "next/dynamic";
+import { InvoiceData } from "@/lib/types/invoice";
 
-// Lazy-load PDF button (client-only)
-// const PdfDownloadButton = dynamic(
-//   () => import("@/_components/PdfDownloadReactPdf.client"),
-//   { ssr: false }
-// );
+// ✅ Lazy-load PDFDownloadBtn for client-only rendering
+const PdfDownloadButton = dynamic(() => import("./fields/pdfDownloadBtn"), {
+  ssr: false,
+});
 
 type Mode = "preview" | "edit";
 
 interface ToolbarProps {
   invoiceId: string;
-  mode: Mode;
+  mode: "preview" | "edit";
+  pdfData?: InvoiceData; // ✅ make optional for flexibility
 }
 
-// ✅ Reusable inline style helpers
+
 const baseBtn: React.CSSProperties = {
   textDecoration: "none",
   padding: "6px 12px",
@@ -43,11 +43,11 @@ const headerStyle: React.CSSProperties = {
   zIndex: 10,
 };
 
-export default function Toolbar({ invoiceId, mode,  }: ToolbarProps) {
+export default function Toolbar({ invoiceId, mode, pdfData }: ToolbarProps) {
+
   const base = `/invoices/${invoiceId}`;
   const isPreview = mode === "preview";
 
-  // Extracted button rendering for DRYness
   const renderNavButton = (
     href: string,
     label: string,
@@ -71,32 +71,44 @@ export default function Toolbar({ invoiceId, mode,  }: ToolbarProps) {
 
   return (
     <header style={headerStyle}>
-      <div style={{ display: "flex", gap: 8, width: "85%", margin: "auto" }}>
-        {renderNavButton(
-          `${base}?mode=preview`,
-          "Preview",
-          isPreview,
-          Eye,
-          "#9ca3af", // neutral gray for edit (was blue)
-          "#f3f4f6"
-        )}
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          width: "85%",
+          margin: "auto",
+          justifyContent: "space-between",
+        }}
+      >
+        <div className="flex items-center space-x-2">
+          {renderNavButton(
+            `${base}?mode=preview`,
+            "Preview",
+            isPreview,
+            Eye,
+            "#9ca3af",
+            "#f3f4f6"
+          )}
 
-        {renderNavButton(
-          `${base}?mode=edit`,
-          "Edit",
-          !isPreview,
-          Pencil,
-          "#9ca3af", // neutral gray for edit (was blue)
-          "#f3f4f6"
-        )}
+          {renderNavButton(
+            `${base}?mode=edit`,
+            "Edit",
+            !isPreview,
+            Pencil,
+            "#9ca3af",
+            "#f3f4f6"
+          )}
+        </div>
+
+        {/* ✅ PDF Download Button */}
+ 
+ {pdfData ? (
+  <PdfDownloadButton data={pdfData} filename={`invoice-${invoiceId}.pdf`} />
+) : (
+  <div style={{ fontSize: 12, color: "#6b7280" }}>PDF not ready</div>
+)}
+
       </div>
-
-      {/* ✅ Safe client-only PDF download (if provided) */}
-      {/* {pdfData ? (
-        <PdfDownloadButton data={pdfData} filename={`invoice-${invoiceId}.pdf`} />
-      ) : (
-        <div style={{ fontSize: 12, color: "#6b7280" }}>PDF not ready</div>
-      )} */}
     </header>
   );
 }
